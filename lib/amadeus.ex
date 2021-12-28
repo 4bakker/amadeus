@@ -1,0 +1,2 @@
+defmodule Amadeus do
+end
