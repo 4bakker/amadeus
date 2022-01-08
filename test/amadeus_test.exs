@@ -9,7 +9,18 @@ defmodule ExVCR.Adapter.FinchTest do
 
   test "get token" do
     use_cassette "token" do
-      token = Amadeus.Client.get_token("", "", MyFinch)
+      client_id = Application.fetch_env!(:amadeus, :client_id)
+      client_secret = Application.fetch_env!(:amadeus, :client_secret)
+      _token = Amadeus.Client.get_token(client_id, client_secret, MyFinch)
+    end
+  end
+
+  test "get cheapest option" do
+    use_cassette "flights" do
+      location_people = %{"AMS" => 3, "BCN" => 1, "LHR" => 2}
+      dates = ["2022-01-20", "2022-01-22"]
+      Amadeus.Agent.get_cheapest_location(location_people, dates)
+      # Amadeus.Agent.find_cheapest_location(quotes)
     end
   end
 
