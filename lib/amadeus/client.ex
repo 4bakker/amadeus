@@ -1,7 +1,7 @@
 defmodule Amadeus.Client do
   @host "https://test.api.amadeus.com"
 
-  def get_quote(journey, dates, token) do
+  def get_quote(journey, dates, token, finch \\ Req.Finch) do
     [from, to, adults] = journey
     [dep, ret] = dates
 
@@ -11,7 +11,8 @@ defmodule Amadeus.Client do
     %Req.Response{status: status, body: body} =
       Req.get!(url,
         headers: [Authorization: "Bearer #{token}"],
-        retry: [delay: 500, max_retries: 3]
+        retry: [delay: 500, max_retries: 3],
+        finch: finch
       )
 
     case status do
@@ -20,11 +21,10 @@ defmodule Amadeus.Client do
           body
           |> get_in(["data", Access.all(), "price", "grandTotal"])
           |> Enum.map(&String.to_float/1)
-          |> tap(&IO.inspect/1)
+          |> tap(&(IO.inspect {from, to, &1}))
           |> Enum.min(fn -> "Not available" end)
 
-        [from, to, min]
-
+          [from, to, min]
       _ ->
         IO.inspect(body)
         [from, to, "Request failed"]

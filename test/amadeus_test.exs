@@ -15,12 +15,27 @@ defmodule ExVCR.Adapter.FinchTest do
     end
   end
 
+  test "get quotes" do
+    use_cassette "quotes" do
+      client_id = Application.fetch_env!(:amadeus, :client_id)
+      client_secret = Application.fetch_env!(:amadeus, :client_secret)
+      token = Amadeus.Client.get_token(client_id, client_secret, MyFinch)
+
+      journey = ["AMS", "BCN", 2]
+      dates = [Date.utc_today |> Date.add(2) |> Date.to_string, Date.utc_today |> Date.add(4) |> Date.to_string]
+      Amadeus.Client.get_quote(journey, dates, token, MyFinch)
+
+      journey = ["BCN", "AMS", 3]
+      dates = [Date.utc_today |> Date.add(2) |> Date.to_string, Date.utc_today |> Date.add(4) |> Date.to_string]
+      Amadeus.Client.get_quote(journey, dates, token, MyFinch)
+    end
+  end
+
   test "get cheapest option" do
-    use_cassette "flights" do
+    use_cassette "cheapest" do
       location_people = %{"AMS" => 3, "BCN" => 1, "LHR" => 2}
       dates = [Date.utc_today |> Date.add(2) |> Date.to_string, Date.utc_today |> Date.add(4) |> Date.to_string]
       Amadeus.Agent.get_cheapest_location(location_people, dates)
-      # Amadeus.Agent.find_cheapest_location(quotes)
     end
   end
 
